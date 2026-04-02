@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Guild Notification Badge Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c2f33;
+            font-size: 28px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            color: #2c2f33;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+
+        input[type="file"],
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="file"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="number"] {
+            width: 120px;
+            font-size: 16px;
+        }
+
+        .canvas-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+            background: #fafafa;
+        }
+
+        .slider-group {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #5568d3;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #5568d3;
+        }
+
+        .preview-section {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .preview-box {
+            text-align: center;
+        }
+
+        .preview-box h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #previewCanvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: #fafafa;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #finalCanvas {
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            background: white;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #2c2f33;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #d0d0d0;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .instruction {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .canvas-grid {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+
+            .preview-section {
+                gap: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 Discord Guild Notification Badge Generator</h1>
+
+        <!-- Image Import Section -->
+        <div class="section">
+            <h2>Step 1: Import Image</h2>
+            <input type="file" id="imageInput" accept="image/*">
+            <div class="instruction">
+                Select an image from your computer. Supported formats: JPG, PNG, WebP, etc.
+            </div>
+        </div>
+
+        <!-- Canvas for image selection -->
+        <div class="section" id="canvasSection" style="display: none;">
+            <h2>Step 2: Select Guild Area</h2>
+            <div class="instruction">
+                Drag to reposition and use the sliders below to adjust the crop area. The dashed square shows the area
+                that will be extracted as your guild image (160×160px). The gray overlay indicates the reserved area
+                where
+                the notification badge will appear.
+            </div>
+            <div class="canvas-section">
+                <div class="canvas-wrapper">
+                    <canvas id="selectionCanvas" width="400" height="400"></canvas>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <label for="offsetXSlider">Horizontal Position</label>
+                <input type="range" id="offsetXSlider" min="0" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+                <label for="offsetYSlider">Vertical Position</label>
+                <input type="range" id="offsetYSlider" min="0" max="100" value="0">
+            </div>
+
+            <div class="slider-group">
+                <label for="zoomSlider">Zoom Level</label>
+                <input type="range" id="zoomSlider" min="0.5" max="5" step="0.1" value="1">
+            </div>
+        </div>
+
+        <!-- Notification Count Section -->
+        <div class="section" id="notificationSection" style="display: none;">
+            <h2>Step 3: Configure Notification Badge</h2>
+            <div class="controls">
+                <div class="input-group">
+                    <label for="notificationCount">Notification Count</label>
+                    <input type="number" id="notificationCount" value="1" min="1" max="999999">
+                </div>
+                <div class="info-text">
+                    Enter a positive integer (1-999999)
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="section" id="previewSection" style="display: none;">
+            <h2>Step 4: Preview & Download</h2>
+            <div class="preview-section">
+                <div class="preview-box">
+                    <h3>Extracted Guild Image</h3>
+                    <canvas id="previewCanvas" width="320" height="320"></canvas>
+                    <div class="info-text">160×160px</div>
+                </div>
+                <div class="preview-box">
+                    <h3>With Notification Badge</h3>
+                    <canvas id="finalCanvas" width="320" height="320"></canvas>
+                    <div class="info-text">160×160px with badge</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-primary" id="downloadBtn">⬇️ Download Image</button>
+                <button class="btn-secondary" id="downloadBadgeBtn">⬇️ Download Badge Only</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Polyfill for roundRect if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+
+        // Configuration
+        const GUILD_SIZE = 160;
+        const BADGE_PADDING = 16;
+        const BASE_BADGE_SIZE = 64;
+        const BADGE_TEXT_SIZE = 48;
+        const CANVAS_DISPLAY_SIZE = 400;
+        const PREVIEW_SCALE = 2;
+
+        // Elements
+        const imageInput = document.getElementById('imageInput');
+        const selectionCanvas = document.getElementById('selectionCanvas');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const finalCanvas = document.getElementById('finalCanvas');
+        const offsetXSlider = document.getElementById('offsetXSlider');
+        const offsetYSlider = document.getElementById('offsetYSlider');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const notificationCount = document.getElementById('notificationCount');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadBadgeBtn = document.getElementById('downloadBadgeBtn');
+        const canvasSection = document.getElementById('canvasSection');
+        const notificationSection = document.getElementById('notificationSection');
+        const previewSection = document.getElementById('previewSection');
+        const selectionCtx = selectionCanvas.getContext('2d');
+        const previewCtx = previewCanvas.getContext('2d');
+        const finalCtx = finalCanvas.getContext('2d');
+
+        let uploadedImage = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let zoom = 1;
+
+        function calculateBadgeDimensions() {
+            const count = notificationCount.value;
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.font = `700 ${BADGE_TEXT_SIZE}px 'Inter', Helvetica, -apple-system, 'Segoe UI', sans-serif`;
+            const textMetrics = tempCtx.measureText(count);
+            const textWidth = textMetrics.width;
+
+            // Width varies based on text, with padding
+            const badgeWidth = Math.ceil(textWidth + BADGE_PADDING * 2);
+            // Height is fixed (Discord design)
+            const badgeHeight = BASE_BADGE_SIZE;
+            // Ensure aspect ratio is at least 1:1 (width >= height)
+            const finalWidth = Math.max(badgeWidth, badgeHeight);
+
+            return {
+                width: finalWidth,
+                height: badgeHeight,
+                reservedWidth: finalWidth + 16,
+                reservedHeight: badgeHeight + 16
+            };
+        }
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                uploadedImage = new Image();
+                uploadedImage.onload = () => {
+                    canvasSection.style.display = 'block';
+                    notificationSection.style.display = 'block';
+                    previewSection.style.display = 'block';
+                    offsetXSlider.value = 0;
+                    offsetYSlider.value = 0;
+                    zoomSlider.value = 1;
+                    offsetX = 0;
+                    offsetY = 0;
+                    zoom = 1;
+                    // Explicitly load Inter font before rendering canvas
+                    document.fonts.load('700 1em Inter').then(() => {
+                        updateCanvases();
+                    }).catch(() => {
+                        // Fallback if font loading fails
+                        updateCanvases();
+                    });
+                };
+                uploadedImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        offsetXSlider.addEventListener('input', (e) => {
+            offsetX = parseFloat(e.target.value);
+            updateCanvases();
+        });
+
+        offsetYSlider.addEventListener('input', (e) => {
+            offsetY = parseFloat(e.target.value);
+            updateCanvases();
+        });
+
+        zoomSlider.addEventListener('input', (e) => {
+            zoom = parseFloat(e.target.value);
+            updateCanvases();
+        });
+
+        notificationCount.addEventListener('input', () => {
+            drawFinalImage();
+        });
+
+        function extractGuildImage() {
+            const ctx = previewCtx;
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, GUILD_SIZE * PREVIEW_SCALE, GUILD_SIZE * PREVIEW_SCALE);
+
+            if (uploadedImage) {
+                const imageWidth = uploadedImage.width;
+                const imageHeight = uploadedImage.height;
+
+                const srcX = (offsetX / 100) * imageWidth;
+                const srcY = (offsetY / 100) * imageHeight;
+                const srcSize = Math.min(imageWidth, imageHeight) / zoom;
+
+                const startX = Math.max(0, Math.min(srcX, imageWidth - srcSize));
+                const startY = Math.max(0, Math.min(srcY, imageHeight - srcSize));
+
+                ctx.drawImage(
+                    uploadedImage,
+                    startX,
+                    startY,
+                    srcSize,
+                    srcSize,
+                    0,
+                    0,
+                    GUILD_SIZE * PREVIEW_SCALE,
+                    GUILD_SIZE * PREVIEW_SCALE
+                );
+            }
+        }
+
+        function drawBadge(ctx, scale) {
+            const dims = calculateBadgeDimensions();
+            const badgeWidth = dims.width * scale;
+            const badgeHeight = dims.height * scale;
+            const textSize = BADGE_TEXT_SIZE * scale;
+            const canvasSize = GUILD_SIZE * scale;
+
+            // Position badge at bottom-right corner
+            const badgeX = Math.max(0, canvasSize - badgeWidth);
+            const badgeY = Math.max(0, canvasSize - badgeHeight);
+
+            // Calculate center of badge
+            const centerX = badgeX + badgeWidth / 2;
+            const centerY = badgeY + badgeHeight / 2;
+
+            // Draw badge as rounded rectangle (pill shape)
+            const radius = badgeHeight / 2;
+
+            ctx.fillStyle = '#da3e44';
+            ctx.beginPath();
+            ctx.moveTo(badgeX + radius, badgeY);
+            ctx.lineTo(badgeX + badgeWidth - radius, badgeY);
+            ctx.arcTo(badgeX + badgeWidth, badgeY, badgeX + badgeWidth, badgeY + radius, radius);
+            ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight - radius);
+            ctx.arcTo(badgeX + badgeWidth, badgeY + badgeHeight, badgeX + badgeWidth - radius, badgeY + badgeHeight, radius);
+            ctx.lineTo(badgeX + radius, badgeY + badgeHeight);
+            ctx.arcTo(badgeX, badgeY + badgeHeight, badgeX, badgeY + badgeHeight - radius, radius);
+            ctx.lineTo(badgeX, badgeY + radius);
+            ctx.arcTo(badgeX, badgeY, badgeX + radius, badgeY, radius);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw badge text
+            const count = notificationCount.value;
+            ctx.fillStyle = 'white';
+            ctx.font = `700 ${Math.round(textSize)}px 'Inter', Helvetica, -apple-system, 'Segoe UI', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Offset text down slightly for better visual centering
+            ctx.fillText(count, centerX, centerY + textSize * 0.1);
+        }
+
+        function drawReservedArea(ctx, scale) {
+            const dims = calculateBadgeDimensions();
+            const badgeWidth = dims.width * scale;
+            const badgeHeight = dims.height * scale;
+            const reservedWidth = dims.reservedWidth * scale;
+            const reservedHeight = dims.reservedHeight * scale;
+            const canvasSize = GUILD_SIZE * scale;
+            const textSize = BADGE_TEXT_SIZE * scale;
+
+            // Position badge at bottom-right corner (same as drawBadge)
+            const badgeX = Math.max(0, canvasSize - badgeWidth);
+            const badgeY = Math.max(0, canvasSize - badgeHeight);
+
+            // Calculate center of badge
+            const badgeCenterX = badgeX + badgeWidth / 2;
+            const badgeCenterY = badgeY + badgeHeight / 2;
+
+            // Position reserved area centered on badge center
+            const reservedX = badgeCenterX - reservedWidth / 2;
+            const reservedY = badgeCenterY - reservedHeight / 2;
+            const radius = reservedHeight / 2;
+
+            ctx.fillStyle = '#35353a';
+            ctx.beginPath();
+            ctx.moveTo(reservedX + radius, reservedY);
+            ctx.lineTo(reservedX + reservedWidth - radius, reservedY);
+            ctx.arcTo(reservedX + reservedWidth, reservedY, reservedX + reservedWidth, reservedY + radius, radius);
+            ctx.lineTo(reservedX + reservedWidth, reservedY + reservedHeight - radius);
+            ctx.arcTo(reservedX + reservedWidth, reservedY + reservedHeight, reservedX + reservedWidth - radius, reservedY + reservedHeight, radius);
+            ctx.lineTo(reservedX + radius, reservedY + reservedHeight);
+            ctx.arcTo(reservedX, reservedY + reservedHeight, reservedX, reservedY + reservedHeight - radius, radius);
+            ctx.lineTo(reservedX, reservedY + radius);
+            ctx.arcTo(reservedX, reservedY, reservedX + radius, reservedY, radius);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawFinalImage() {
+            extractGuildImage();
+
+            finalCtx.fillStyle = '#f0f0f0';
+            finalCtx.fillRect(0, 0, GUILD_SIZE * PREVIEW_SCALE, GUILD_SIZE * PREVIEW_SCALE);
+
+            if (uploadedImage) {
+                const imageWidth = uploadedImage.width;
+                const imageHeight = uploadedImage.height;
+
+                const srcX = (offsetX / 100) * imageWidth;
+                const srcY = (offsetY / 100) * imageHeight;
+                const srcSize = Math.min(imageWidth, imageHeight) / zoom;
+
+                const startX = Math.max(0, Math.min(srcX, imageWidth - srcSize));
+                const startY = Math.max(0, Math.min(srcY, imageHeight - srcSize));
+
+                finalCtx.drawImage(
+                    uploadedImage,
+                    startX,
+                    startY,
+                    srcSize,
+                    srcSize,
+                    0,
+                    0,
+                    GUILD_SIZE * PREVIEW_SCALE,
+                    GUILD_SIZE * PREVIEW_SCALE
+                );
+            }
+
+            drawReservedArea(finalCtx, PREVIEW_SCALE);
+            drawBadge(finalCtx, PREVIEW_SCALE);
+        }
+
+        function updateCanvases() {
+            if (!uploadedImage) return;
+            drawSelectionPreview();
+            drawFinalImage();
+        }
+
+        function drawSelectionPreview() {
+            selectionCtx.fillStyle = '#f0f0f0';
+            selectionCtx.fillRect(0, 0, CANVAS_DISPLAY_SIZE, CANVAS_DISPLAY_SIZE);
+
+            if (uploadedImage) {
+                const imageWidth = uploadedImage.width;
+                const imageHeight = uploadedImage.height;
+
+                const srcX = (offsetX / 100) * imageWidth;
+                const srcY = (offsetY / 100) * imageHeight;
+                const srcSize = Math.min(imageWidth, imageHeight) / zoom;
+
+                const startX = Math.max(0, Math.min(srcX, imageWidth - srcSize));
+                const startY = Math.max(0, Math.min(srcY, imageHeight - srcSize));
+
+                const displayScale = CANVAS_DISPLAY_SIZE / srcSize;
+
+                const displayWidth = imageWidth * displayScale;
+                const displayHeight = imageHeight * displayScale;
+                const displayX = -startX * displayScale;
+                const displayY = -startY * displayScale;
+
+                selectionCtx.drawImage(
+                    uploadedImage,
+                    displayX,
+                    displayY,
+                    displayWidth,
+                    displayHeight
+                );
+
+                const squareSize = CANVAS_DISPLAY_SIZE;
+                selectionCtx.strokeStyle = '#667eea';
+                selectionCtx.lineWidth = 2;
+                selectionCtx.setLineDash([5, 5]);
+                selectionCtx.strokeRect(0, 0, squareSize, squareSize);
+                selectionCtx.setLineDash([]);
+            }
+        }
+
+        function createActualSizeImage() {
+            // Scale down the preview canvas (which includes everything) to actual 40x40 size
+            const canvas = document.createElement('canvas');
+            canvas.width = GUILD_SIZE;
+            canvas.height = GUILD_SIZE;
+            const ctx = canvas.getContext('2d');
+
+            // Draw the finalCanvas (at PREVIEW_SCALE=4) scaled down to 40x40
+            // This includes the guild image, badge, and reserved area
+            ctx.drawImage(
+                finalCanvas,
+                0,
+                0,
+                GUILD_SIZE * PREVIEW_SCALE,
+                GUILD_SIZE * PREVIEW_SCALE,
+                0,
+                0,
+                GUILD_SIZE,
+                GUILD_SIZE
+            );
+
+            return canvas;
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const canvas = createActualSizeImage();
+            downloadCanvasAsImage(canvas, 'discord-guild-notification.png');
+        });
+
+        downloadBadgeBtn.addEventListener('click', () => {
+            // Download the extracted guild image (without badge)
+            const canvas = document.createElement('canvas');
+            canvas.width = GUILD_SIZE;
+            canvas.height = GUILD_SIZE;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(
+                previewCanvas,
+                0,
+                0,
+                GUILD_SIZE * PREVIEW_SCALE,
+                GUILD_SIZE * PREVIEW_SCALE,
+                0,
+                0,
+                GUILD_SIZE,
+                GUILD_SIZE
+            );
+            downloadCanvasAsImage(canvas, 'discord-guild-image.png');
+        });
+
+        function downloadCanvasAsImage(canvas, filename) {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+
+</html>
